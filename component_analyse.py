@@ -85,11 +85,14 @@ def get_export_activity(androidmanifest_dir):
                 tmp_activity_name = activity_name
                 export_activity[component_name][tmp_activity_name] = {"condition": [], "is_export": ""}
                 if "android:exported=\"false\"" in line:
-                    start = False
                     export_activity[component_name][tmp_activity_name]["is_export"] = "exported=False"
-                    continue
-                else:
+                elif "android:exported=\"true\"" in line:
                     export_activity[component_name][tmp_activity_name]["is_export"] = "exported=True"
+                else:
+                    if "/>" in line:
+                        export_activity[component_name][tmp_activity_name]["is_export"] = "exported=False"
+                    else:
+                        export_activity[component_name][tmp_activity_name]["is_export"] = "exported=True"
                 start = False if "/>" in line else True
                 continue
             if start:
@@ -101,13 +104,12 @@ def get_export_activity(androidmanifest_dir):
                     export_activity[component_name][tmp_activity_name]["condition"].append(line.strip())
         return export_activity
 
-
 @click.command()
 @click.option('--project_dir', help='jadx -e xxx.apk,such as xxxxx_standalone')
 def main(project_dir):
     lark_manager = get_larkmanager(
-        user_access_token="xxxx",
-        folder_token="xxxx"
+        user_access_token="",
+        folder_token=""
     )
     sheet_title = project_dir.split('/')[-1]
     spreadsheet_token = lark_manager.create_sheet(sheet_title)
