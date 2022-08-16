@@ -2,7 +2,7 @@ from util import *
 
 
 class LarkManager:
-    # how to get user_access_token:https://open.feishu.cn/api-explorer/cli_a0351fe3a778900e?apiName=app_ticket_resend&project=auth&resource=auth&state=&version=v3
+    # how to get user_access_token:https://open.feishu.cn/api-explorer/xxxx?apiName=app_ticket_resend&project=auth&resource=auth&state=&version=v3
     # user_token valid in 2 hours
 
     def __init__(self, user_access_token, folder_token):
