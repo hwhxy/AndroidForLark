@@ -1,4 +1,4 @@
-from AndroidForLark.util import *
+from util import *
 
 
 class LarkManager:

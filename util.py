@@ -1,16 +1,15 @@
 import urllib3
+import requests
 import json
+import click
 import os
 from os import path
-import click
-import requests
+
 urllib3.disable_warnings()
 
 
-def get_larkmanager():
-    from AndroidForLark.LarkManager import LarkManager
-    user_access_token = "xxxx"
-    folder_token = "xxxx"
+def get_larkmanager(user_access_token,folder_token):
+    from LarkManager import LarkManager
     LarkManager = LarkManager(user_access_token, folder_token)
     return LarkManager
 

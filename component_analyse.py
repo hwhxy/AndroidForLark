@@ -1,6 +1,5 @@
+from util import *
 
-
-from AndroidForLark.util import *
 
 # run app.activity.info -a xxx
 # run app.service.info -a xxx
@@ -106,7 +105,10 @@ def get_export_activity(androidmanifest_dir):
 @click.command()
 @click.option('--project_dir', help='jadx -e xxx.apk,such as xxxxx_standalone')
 def main(project_dir):
-    lark_manager = get_larkmanager()
+    lark_manager = get_larkmanager(
+        user_access_token="xxxx",
+        folder_token="xxxx"
+    )
     sheet_title = project_dir.split('/')[-1]
     spreadsheet_token = lark_manager.create_sheet(sheet_title)
     androidmanifest_dir = f"{project_dir}/app/src/main/AndroidManifest.xml"
