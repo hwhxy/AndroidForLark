@@ -2,24 +2,24 @@ from util import *
 
 
 class LarkManager:
-    # how to get user_access_token:https://open.feishu.cn/api-explorer/xxxx?apiName=app_ticket_resend&project=auth&resource=auth&state=&version=v3
+    # how to get user_access_token:https://open.feishu.cn/api-explorer/{}?apiName=app_ticket_resend&project=auth&resource=auth&state=&version=v3
     # user_token valid in 2 hours
 
     def __init__(self, user_access_token, folder_token):
         self.user_access_token = user_access_token
         self.folder_token = folder_token
-
-    def create_sheet(self, sheet_title):
-        url = "https://open.feishu.cn/open-apis/sheets/v3/spreadsheets"
-        headers = {
+        self.headers = {
             "Authorization": f"Bearer {self.user_access_token}",
             "Content-Type": "application/json; charset=utf-8"
         }
+
+    def create_sheet(self, sheet_title):
+        url = "https://open.feishu.cn/open-apis/sheets/v3/spreadsheets"
         data = {
             "title": sheet_title,
             "folder_token": self.folder_token
         }
-        rsp = requests.post(url, headers=headers, json=data, timeout=5, verify=False)
+        rsp = requests.post(url, headers=self.headers, json=data, timeout=5, verify=False)
         content = json.loads(rsp.content)
         if "data" in content and "spreadsheet" in content.get("data") and "spreadsheet_token" in content.get(
                 "data").get("spreadsheet"):
@@ -32,10 +32,6 @@ class LarkManager:
 
     def add_spreadsheet(self, spreadsheet_token, title):
         url = f"https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/{spreadsheet_token}/sheets_batch_update"
-        headers = {
-            "Authorization": f"Bearer {self.user_access_token}",
-            "Content-Type": "application/json; charset=utf-8"
-        }
         data = {
             "requests": [
                 {
@@ -48,7 +44,7 @@ class LarkManager:
                 }
             ]
         }
-        rsp = requests.post(url, headers=headers, json=data, timeout=5, verify=False)
+        rsp = requests.post(url, headers=self.headers, json=data, timeout=5, verify=False)
         content = json.loads(rsp.content)
         if "data" in content and "replies" in content.get("data"):
             addSheet_list = content.get("data").get("replies")
@@ -63,10 +59,6 @@ class LarkManager:
 
     def write_sheet(self, data, spreadsheet_token, sheet_id):
         write_sheet_url = f"https://open.feishu.cn/open-apis/sheet/v2/spreadsheets/{spreadsheet_token}/values"
-        header = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.user_access_token}"
-        }
         raw_num, col_num = len(data), len(data[0])
         start = 1
         while start - 1 < raw_num:
@@ -82,10 +74,9 @@ class LarkManager:
                 }
             }
             while True:
-                resp = requests.put(write_sheet_url, headers=header, json=body, timeout=5, verify=False)
+                resp = requests.put(write_sheet_url, headers=self.headers, json=body, timeout=5, verify=False)
                 if resp.status_code != 200 or json.loads(resp.text).get("msg", "") != "success":
                     print(json.loads(resp.text))
                     continue
                 break
             start = start + 500
-

@@ -7,13 +7,6 @@ from os import path
 
 urllib3.disable_warnings()
 
-
-def get_larkmanager(user_access_token,folder_token):
-    from LarkManager import LarkManager
-    LarkManager = LarkManager(user_access_token, folder_token)
-    return LarkManager
-
-
 def num_char(total_cols):
     if total_cols <= 26:  # A~Z
         return chr(65 + total_cols - 1)
