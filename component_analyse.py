@@ -1,7 +1,9 @@
 import re
+import subprocess
 
 from util import *
 from LarkManager import LarkManager
+import os
 
 
 # run app.activity.info -a xxx
@@ -114,6 +116,24 @@ class ComponentEngine:
         return url_lists
 
 
+class JadxEngine:
+    def __init__(self, apk_dir):
+        self.jadx_dir = "./jadx-1.4.4"
+        self.apk_dir = apk_dir
+        self.re_apk_dir = ""
+
+    def set_apk_dir(self, apk_dir):
+        self.apk_dir = apk_dir
+
+    def apk_reserve(self):
+        self.re_apk_dir = self.apk_dir + "_jadx_gradle"
+        cmd = f"{self.jadx_dir}/bin/jadx -e {self.apk_dir} -d {self.re_apk_dir}"
+        print(f"开始逆向,请等待！cmd:{cmd}")
+        pipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(pipe.stdout.read().decode())
+        print(f"逆向结束,文件输出为:{self.re_apk_dir}")
+
+
 def upload_component_export_lark(component_engine, lark_manager, spreadsheet_token):
     for component_type in component_engine.component_dict:
         sheet_id = lark_manager.add_spreadsheet(spreadsheet_token, component_type)
@@ -153,12 +173,18 @@ def upload_apk_url(component_engine, lark_manager, spreadsheet_token):
 
 
 @click.command()
-@click.option('--project_dir', help='jadx -e xxx.apk,such as xxxxx_standalone')
-def main(project_dir):
-    # how to get user_access_token:https://open.feishu.cn/api-explorer/{}?apiName=app_ticket_resend&project=auth&resource=auth&state=&version=v3
+@click.option('--project_dir', default="no_project_dir", help='jadx -e xxx.apk,such as xxxxx_standalone')
+@click.option('--apk_dir', help='auto jadx', default="no_apk")
+def main(apk_dir, project_dir):
+    # how to get user_access_token:https://open.feishu.cn/api-explorer/?apiName=app_ticket_resend&project=auth&resource=auth&state=&version=v3
     # user_token valid in 2 hours
+    if apk_dir != "no_apk":
+        jadx_engine = JadxEngine(apk_dir=apk_dir)
+        jadx_engine.apk_reserve()
+        project_dir = jadx_engine.re_apk_dir
+
     lark_manager = LarkManager(
-        user_access_token="",
+        user_access_token="u-",
         folder_token=""
     )
     component_engine = ComponentEngine(
@@ -171,7 +197,7 @@ def main(project_dir):
 
     upload_component_export_lark(component_engine, lark_manager, spreadsheet_token)
     upload_apk_url(component_engine, lark_manager, spreadsheet_token)
-    print(f"https://xxxx.feishu.cn/sheets/{spreadsheet_token}")
+    print(f"https://.feishu.cn/sheets/{spreadsheet_token}")
 
 
 if __name__ == '__main__':
